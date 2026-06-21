@@ -162,6 +162,8 @@
   position: absolute;
   max-width: none;
   pointer-events: none;
+  /* Apply EXIF orientation when displaying, matching the oriented output decode. */
+  image-orientation: from-image;
   will-change: left, top, width, height;
 }
 

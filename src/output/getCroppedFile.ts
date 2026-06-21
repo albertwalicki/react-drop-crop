@@ -21,6 +21,40 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
+interface OrientedSource {
+  source: CanvasImageSource;
+  width: number;
+  height: number;
+  close?: () => void;
+}
+
+/**
+ * Decode the image with EXIF orientation already applied, so phone photos crop
+ * upright. `createImageBitmap(..., { imageOrientation: 'from-image' })` returns
+ * a bitmap whose dimensions match the auto-oriented <img> the cropper displays,
+ * keeping crop coordinates consistent. Falls back to a plain <img> decode
+ * (browsers auto-orient <img> via the default image-orientation: from-image).
+ */
+async function loadOriented(file: File, src: string): Promise<OrientedSource> {
+  if (typeof createImageBitmap === 'function') {
+    try {
+      const bitmap = await createImageBitmap(file, {
+        imageOrientation: 'from-image',
+      } as ImageBitmapOptions);
+      return {
+        source: bitmap,
+        width: bitmap.width,
+        height: bitmap.height,
+        close: () => bitmap.close(),
+      };
+    } catch {
+      // fall through to <img> decode
+    }
+  }
+  const img = await loadImage(src);
+  return { source: img, width: img.naturalWidth, height: img.naturalHeight };
+}
+
 function resolveFileName(
   output: OutputOptions | undefined,
   originalName: string,
@@ -39,8 +73,8 @@ function resolveFileName(
  * downscale to `output.maxWidth/maxHeight`, encode to the chosen format, and
  * return a ready-to-upload File plus an object URL for preview.
  *
- * NOTE: EXIF orientation correction is not applied yet (tracked for v1) — phone
- * photos with rotation metadata may crop rotated until that lands.
+ * EXIF orientation is applied during decode (see `loadOriented`), so rotated
+ * phone photos crop upright.
  */
 export async function getCroppedFile(
   originalFile: File,
@@ -48,7 +82,7 @@ export async function getCroppedFile(
   cropArea: CropArea,
   output?: OutputOptions,
 ): Promise<CropResult> {
-  const img = await loadImage(src);
+  const oriented = await loadOriented(originalFile, src);
 
   const format = output?.format ?? 'webp';
   const mime = format === 'original' ? originalFile.type || 'image/png' : MIME[format];
@@ -65,6 +99,18 @@ export async function getCroppedFile(
   targetW = Math.max(1, Math.round(targetW * scale));
   targetH = Math.max(1, Math.round(targetH * scale));
 
+  // Browsers silently fail toBlob past their canvas limits (~16k px / area caps).
+  // Clamp very large outputs so encoding never silently returns null.
+  const MAX_CANVAS_DIM = 8192;
+  const safety = Math.min(1, MAX_CANVAS_DIM / targetW, MAX_CANVAS_DIM / targetH);
+  if (safety < 1) {
+    targetW = Math.max(1, Math.round(targetW * safety));
+    targetH = Math.max(1, Math.round(targetH * safety));
+    console.warn(
+      `[react-drop-crop] output exceeded ${MAX_CANVAS_DIM}px and was downscaled; set output.maxWidth/maxHeight to control this.`,
+    );
+  }
+
   const canvas = document.createElement('canvas');
   canvas.width = targetW;
   canvas.height = targetH;
@@ -80,7 +126,7 @@ export async function getCroppedFile(
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(
-    img,
+    oriented.source,
     cropArea.x,
     cropArea.y,
     cropArea.width,
@@ -90,6 +136,7 @@ export async function getCroppedFile(
     targetW,
     targetH,
   );
+  oriented.close?.();
 
   const blob = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob(resolve, mime, quality),
