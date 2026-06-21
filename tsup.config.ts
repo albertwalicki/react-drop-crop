@@ -1,7 +1,8 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts', 'src/styles.css'],
+  // Object form pins output names: dist/index.* and dist/styles.css.
+  entry: { index: 'src/index.ts', styles: 'src/styles/index.css' },
   format: ['esm', 'cjs'],
   // Generate type declarations only for the JS entry, not the CSS.
   dts: { entry: 'src/index.ts' },

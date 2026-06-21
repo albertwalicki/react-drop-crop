@@ -1,0 +1,58 @@
+/* react-drop-crop — theme tokens. Override any --rdc-* to theme the component. */
+
+.rdc-root {
+  /* ---- color tokens (light defaults) ---- */
+  --rdc-bg: #ffffff;
+  --rdc-fg: #1a1a1a;
+  --rdc-muted: #6b7280;
+  --rdc-border: #d1d5db;
+  --rdc-border-hover: #9ca3af;
+  --rdc-accent: #2563eb;
+  --rdc-accent-fg: #ffffff;
+  --rdc-dropzone-bg: #f9fafb;
+  --rdc-overlay: rgba(0, 0, 0, 0.5);
+
+  /* ---- shape / spacing tokens ---- */
+  --rdc-radius: 12px;
+  --rdc-radius-sm: 8px;
+  --rdc-gap: 12px;
+  --rdc-pad: 24px;
+  --rdc-font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  box-sizing: border-box;
+  color: var(--rdc-fg);
+  font-family: var(--rdc-font);
+}
+
+.rdc-root *,
+.rdc-root *::before,
+.rdc-root *::after {
+  box-sizing: border-box;
+}
+
+/* ---- dark theme: explicit opt-in + auto via prefers-color-scheme ---- */
+.rdc-root[data-theme='dark'] {
+  --rdc-bg: #18181b;
+  --rdc-fg: #f4f4f5;
+  --rdc-muted: #a1a1aa;
+  --rdc-border: #3f3f46;
+  --rdc-border-hover: #52525b;
+  --rdc-accent: #3b82f6;
+  --rdc-accent-fg: #ffffff;
+  --rdc-dropzone-bg: #27272a;
+  --rdc-overlay: rgba(0, 0, 0, 0.7);
+}
+
+@media (prefers-color-scheme: dark) {
+  .rdc-root[data-theme='auto'] {
+    --rdc-bg: #18181b;
+    --rdc-fg: #f4f4f5;
+    --rdc-muted: #a1a1aa;
+    --rdc-border: #3f3f46;
+    --rdc-border-hover: #52525b;
+    --rdc-accent: #3b82f6;
+    --rdc-accent-fg: #ffffff;
+    --rdc-dropzone-bg: #27272a;
+    --rdc-overlay: rgba(0, 0, 0, 0.7);
+  }
+}

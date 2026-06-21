@@ -1,7 +1,7 @@
 import { StrictMode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ImageUploadCrop, type CropResult } from 'react-drop-crop';
-import '../src/styles.css';
+import '../src/styles/index.css';
 import './demo.css';
 
 // Demo transport: fake an upload with incremental progress.

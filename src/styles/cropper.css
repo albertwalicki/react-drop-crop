@@ -1,136 +1,3 @@
-/* react-drop-crop — base styles & theme tokens.
-   Everything is driven by CSS custom properties (prefixed --rdc-) so consumers
-   can theme it without touching internals. Import once:
-     import 'react-drop-crop/styles.css'; */
-
-.rdc-root {
-  /* ---- color tokens (light defaults) ---- */
-  --rdc-bg: #ffffff;
-  --rdc-fg: #1a1a1a;
-  --rdc-muted: #6b7280;
-  --rdc-border: #d1d5db;
-  --rdc-border-hover: #9ca3af;
-  --rdc-accent: #2563eb;
-  --rdc-accent-fg: #ffffff;
-  --rdc-dropzone-bg: #f9fafb;
-  --rdc-overlay: rgba(0, 0, 0, 0.5);
-
-  /* ---- shape / spacing tokens ---- */
-  --rdc-radius: 12px;
-  --rdc-radius-sm: 8px;
-  --rdc-gap: 12px;
-  --rdc-pad: 24px;
-  --rdc-font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-
-  box-sizing: border-box;
-  color: var(--rdc-fg);
-  font-family: var(--rdc-font);
-}
-
-.rdc-root *,
-.rdc-root *::before,
-.rdc-root *::after {
-  box-sizing: border-box;
-}
-
-/* ---- dark theme: explicit opt-in + auto via prefers-color-scheme ---- */
-.rdc-root[data-theme='dark'] {
-  --rdc-bg: #18181b;
-  --rdc-fg: #f4f4f5;
-  --rdc-muted: #a1a1aa;
-  --rdc-border: #3f3f46;
-  --rdc-border-hover: #52525b;
-  --rdc-accent: #3b82f6;
-  --rdc-accent-fg: #ffffff;
-  --rdc-dropzone-bg: #27272a;
-  --rdc-overlay: rgba(0, 0, 0, 0.7);
-}
-
-@media (prefers-color-scheme: dark) {
-  .rdc-root[data-theme='auto'] {
-    --rdc-bg: #18181b;
-    --rdc-fg: #f4f4f5;
-    --rdc-muted: #a1a1aa;
-    --rdc-border: #3f3f46;
-    --rdc-border-hover: #52525b;
-    --rdc-accent: #3b82f6;
-    --rdc-accent-fg: #ffffff;
-    --rdc-dropzone-bg: #27272a;
-    --rdc-overlay: rgba(0, 0, 0, 0.7);
-  }
-}
-
-/* ---- dropzone ---- */
-.rdc-dropzone {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--rdc-gap);
-  padding: var(--rdc-pad);
-  min-height: 200px;
-  text-align: center;
-  background: var(--rdc-dropzone-bg);
-  border: 2px dashed var(--rdc-border);
-  border-radius: var(--rdc-radius);
-  transition: border-color 120ms ease;
-}
-
-.rdc-dropzone:hover {
-  border-color: var(--rdc-border-hover);
-}
-
-.rdc-dropzone[data-disabled] {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.rdc-dropzone__hint {
-  margin: 0;
-  color: var(--rdc-muted);
-  font-size: 0.95rem;
-}
-
-/* ---- button ---- */
-.rdc-button {
-  appearance: none;
-  cursor: pointer;
-  font: inherit;
-  font-weight: 600;
-  padding: 8px 16px;
-  color: var(--rdc-accent-fg);
-  background: var(--rdc-accent);
-  border: none;
-  border-radius: var(--rdc-radius-sm);
-  transition: filter 120ms ease;
-}
-
-.rdc-button:hover:not(:disabled) {
-  filter: brightness(1.08);
-}
-
-.rdc-button:focus-visible {
-  outline: 2px solid var(--rdc-accent);
-  outline-offset: 2px;
-}
-
-.rdc-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.rdc-button--ghost {
-  color: var(--rdc-fg);
-  background: transparent;
-  border: 1px solid var(--rdc-border);
-}
-
-.rdc-button--ghost:hover:not(:disabled) {
-  filter: none;
-  border-color: var(--rdc-border-hover);
-}
-
-/* ---- cropper ---- */
 .rdc-cropper {
   display: flex;
   flex-direction: column;
@@ -177,6 +44,12 @@
   pointer-events: none;
 }
 
+.rdc-cropper__grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 .rdc-cropper__grid::before,
 .rdc-cropper__grid::after {
   content: '';
@@ -205,12 +78,6 @@
     0 66.66%;
   background-size: 100% 1px;
   background-repeat: no-repeat;
-}
-
-.rdc-cropper__grid {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
 }
 
 .rdc-cropper__window[data-shape='round'] .rdc-cropper__grid {
@@ -339,56 +206,4 @@
   background: var(--rdc-accent);
   border-radius: 999px;
   transition: width 120ms ease;
-}
-
-/* ---- result preview / error ---- */
-.rdc-preview {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--rdc-gap);
-}
-
-.rdc-preview__img {
-  max-width: 160px;
-  max-height: 160px;
-  border-radius: var(--rdc-radius-sm);
-}
-
-.rdc-error {
-  margin: 0;
-  color: #dc2626;
-  font-size: 0.875rem;
-}
-
-/* ---- modal ---- */
-.rdc-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-
-.rdc-modal__backdrop {
-  position: absolute;
-  inset: 0;
-  background: var(--rdc-overlay);
-}
-
-.rdc-modal__card {
-  position: relative;
-  width: min(520px, 100%);
-  max-height: 90vh;
-  overflow: auto;
-  padding: var(--rdc-pad);
-  background: var(--rdc-bg);
-  border-radius: var(--rdc-radius);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.rdc-modal__card .rdc-cropper-panel {
-  margin-top: 0;
 }

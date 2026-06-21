@@ -1,0 +1,39 @@
+/* Buttons shared across dropzone, toolbar, preview. */
+
+.rdc-button {
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  padding: 8px 16px;
+  color: var(--rdc-accent-fg);
+  background: var(--rdc-accent);
+  border: none;
+  border-radius: var(--rdc-radius-sm);
+  transition: filter 120ms ease;
+}
+
+.rdc-button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.rdc-button:focus-visible {
+  outline: 2px solid var(--rdc-accent);
+  outline-offset: 2px;
+}
+
+.rdc-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.rdc-button--ghost {
+  color: var(--rdc-fg);
+  background: transparent;
+  border: 1px solid var(--rdc-border);
+}
+
+.rdc-button--ghost:hover:not(:disabled) {
+  filter: none;
+  border-color: var(--rdc-border-hover);
+}
