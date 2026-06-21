@@ -87,6 +87,18 @@ describe('ImageUploadCrop', () => {
     expect(onSelect).toHaveBeenCalledOnce();
   });
 
+  it('shows a drag-over indicator while a file is dragged over', () => {
+    const { container } = render(<ImageUploadCrop />);
+    const zone = container.querySelector('.rdc-dropzone')!;
+    expect(zone.hasAttribute('data-dragging')).toBe(false);
+
+    fireEvent.dragEnter(zone, { dataTransfer: { types: ['Files'] } });
+    expect(zone.hasAttribute('data-dragging')).toBe(true);
+
+    fireEvent.dragLeave(zone, { dataTransfer: { types: ['Files'] } });
+    expect(zone.hasAttribute('data-dragging')).toBe(false);
+  });
+
   it('reports status transitions through onStatusChange', () => {
     const onStatusChange = vi.fn();
     const { container } = render(<ImageUploadCrop onStatusChange={onStatusChange} />);

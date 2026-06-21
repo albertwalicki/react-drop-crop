@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import type { ClassNames } from '../types';
 import { cx } from '../core/cx';
 
@@ -12,6 +12,10 @@ export interface DropzoneProps {
   children?: React.ReactNode;
 }
 
+function isFileDrag(e: React.DragEvent): boolean {
+  return Array.from(e.dataTransfer?.types ?? []).includes('Files');
+}
+
 export function Dropzone({
   accept,
   disabled,
@@ -21,15 +25,39 @@ export function Dropzone({
   children,
 }: DropzoneProps): React.JSX.Element {
   const inputRef = useRef<HTMLInputElement>(null);
+  // Depth counter so dragging over child elements doesn't flip the state off
+  // (dragenter/dragleave fire as the pointer crosses children).
+  const dragDepth = useRef(0);
+  const [dragging, setDragging] = useState(false);
 
   return (
     <div
       className={cx('rdc-dropzone', classNames?.dropzone)}
       data-disabled={disabled || undefined}
-      onDragOver={(e) => e.preventDefault()}
+      data-dragging={dragging || undefined}
+      onDragEnter={(e) => {
+        if (disabled || !isFileDrag(e)) return;
+        e.preventDefault();
+        dragDepth.current += 1;
+        setDragging(true);
+      }}
+      onDragOver={(e) => {
+        if (disabled || !isFileDrag(e)) return;
+        e.preventDefault();
+      }}
+      onDragLeave={() => {
+        if (disabled) return;
+        dragDepth.current -= 1;
+        if (dragDepth.current <= 0) {
+          dragDepth.current = 0;
+          setDragging(false);
+        }
+      }}
       onDrop={(e) => {
         e.preventDefault();
-        onFiles(e.dataTransfer.files);
+        dragDepth.current = 0;
+        setDragging(false);
+        if (!disabled) onFiles(e.dataTransfer.files);
       }}
     >
       <p className="rdc-dropzone__hint">{labels.dropHere}</p>

@@ -10,11 +10,24 @@
   background: var(--rdc-dropzone-bg);
   border: 2px dashed var(--rdc-border);
   border-radius: var(--rdc-radius);
-  transition: border-color 120ms ease;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease;
 }
 
 .rdc-dropzone:hover {
   border-color: var(--rdc-border-hover);
+}
+
+/* Active drag-over state: highlight to signal a drop will land here. */
+.rdc-dropzone[data-dragging] {
+  border-style: solid;
+  border-color: var(--rdc-accent);
+  background: color-mix(in srgb, var(--rdc-accent) 8%, var(--rdc-dropzone-bg));
+}
+
+.rdc-dropzone[data-dragging] .rdc-dropzone__hint {
+  color: var(--rdc-accent);
 }
 
 .rdc-dropzone[data-disabled] {
