@@ -19,20 +19,12 @@ export function clamp(value: number, min: number, max: number): number {
  * within ~90% of the container so there's room to pan, honoring the aspect
  * ratio (forced to 1 for round/avatar shapes).
  */
-export function getCropSize(
-  container: Size,
-  aspect: number | 'free',
-  shape: CropShape,
-): Size {
+export function getCropSize(container: Size, aspect: number | 'free', shape: CropShape): Size {
   if (container.width === 0 || container.height === 0) {
     return { width: 0, height: 0 };
   }
   const ratio =
-    shape === 'round'
-      ? 1
-      : aspect === 'free'
-        ? container.width / container.height
-        : aspect;
+    shape === 'round' ? 1 : aspect === 'free' ? container.width / container.height : aspect;
 
   const availW = container.width * 0.9;
   const availH = container.height * 0.9;
@@ -63,12 +55,7 @@ export function getDisplaySize(natural: Size, baseScale: number, zoom: number): 
  * Keep the image covering the crop window: the pan offset can't move the image
  * far enough to reveal empty space inside the window.
  */
-export function clampPosition(
-  pos: Point,
-  display: Size,
-  crop: Size,
-  restrict: boolean,
-): Point {
+export function clampPosition(pos: Point, display: Size, crop: Size, restrict: boolean): Point {
   if (!restrict) return pos;
   const maxX = Math.max(0, (display.width - crop.width) / 2);
   const maxY = Math.max(0, (display.height - crop.height) / 2);

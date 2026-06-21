@@ -36,7 +36,12 @@ describe('moveCropRect', () => {
   const bounds = { width: 800, height: 400 };
 
   it('translates within bounds', () => {
-    expect(moveCropRect(start, 50, -50, bounds)).toEqual({ x: 150, y: 50, width: 200, height: 200 });
+    expect(moveCropRect(start, 50, -50, bounds)).toEqual({
+      x: 150,
+      y: 50,
+      width: 200,
+      height: 200,
+    });
   });
 
   it('clamps to the image edges', () => {

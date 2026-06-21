@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react';
-import type {
-  CropResult,
-  ImageUploadCropProps,
-  ImageUploadError,
-  UploadStatus,
-} from './types';
+import type { CropResult, ImageUploadCropProps, ImageUploadError, UploadStatus } from './types';
 import { FrameCropper } from './cropper/FrameCropper';
 import { RectCropper } from './cropper/RectCropper';
 import type { CropperHandle } from './cropper/types';
@@ -72,6 +67,8 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
   const inputRef = useRef<HTMLInputElement>(null);
   const cropperRef = useRef<CropperHandle>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const srcUrlRef = useRef<string | null>(null);
+  const resultUrlRef = useRef<string | null>(null);
 
   const [file, setFile] = useState<File | null>(null);
   const [srcUrl, setSrcUrl] = useState<string | null>(null);
@@ -98,26 +95,40 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
     [onError],
   );
 
+  // Object-URL setters that revoke the previous URL to prevent leaks.
+  const setSrc = useCallback((url: string | null) => {
+    if (srcUrlRef.current && srcUrlRef.current !== url) {
+      URL.revokeObjectURL(srcUrlRef.current);
+    }
+    srcUrlRef.current = url;
+    setSrcUrl(url);
+  }, []);
+
+  const setCropResult = useCallback((res: CropResult | null) => {
+    const nextUrl = res?.previewUrl ?? null;
+    if (resultUrlRef.current && resultUrlRef.current !== nextUrl) {
+      URL.revokeObjectURL(resultUrlRef.current);
+    }
+    resultUrlRef.current = nextUrl;
+    setResult(res);
+  }, []);
+
   const reset = useCallback(() => {
     abortRef.current?.abort();
-    setSrcUrl((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return null;
-    });
-    setResult((prev) => {
-      if (prev) URL.revokeObjectURL(prev.previewUrl);
-      return null;
-    });
+    setSrc(null);
+    setCropResult(null);
     setFile(null);
     setError(null);
     setProgress(0);
     setStatus('idle');
-  }, []);
+  }, [setSrc, setCropResult]);
 
-  // revoke object URLs on unmount
+  // revoke object URLs + abort any in-flight upload on unmount
   useEffect(() => {
     return () => {
       abortRef.current?.abort();
+      if (srcUrlRef.current) URL.revokeObjectURL(srcUrlRef.current);
+      if (resultUrlRef.current) URL.revokeObjectURL(resultUrlRef.current);
     };
   }, []);
 
@@ -150,9 +161,9 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
 
   const handleFilesRef = useRef<((files: FileList | null) => void) | null>(null);
 
-  // Paste support: drop a clipboard image onto the component while it's idle.
+  // Paste support: drop a clipboard image onto the component. Ignored mid-upload.
   useEffect(() => {
-    if (disabled || !sources.includes('paste')) return;
+    if (disabled || !sources.includes('paste') || status === 'uploading') return;
     const onPaste = (e: ClipboardEvent) => {
       const items = e.clipboardData?.items;
       if (!items) return;
@@ -170,7 +181,7 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
     };
     document.addEventListener('paste', onPaste);
     return () => document.removeEventListener('paste', onPaste);
-  }, [disabled, sources]);
+  }, [disabled, sources, status]);
 
   const handleFiles = useCallback(
     (files: FileList | null) => {
@@ -197,13 +208,26 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
         return;
       }
 
-      const url = URL.createObjectURL(picked);
-      setSrcUrl(url);
+      setSrc(URL.createObjectURL(picked));
       setStatus('cropping');
     },
-    [accept, autoUpload, crop, disabled, fail, l.tooLarge, l.wrongType, maxSize, onSelect, runUpload],
+    [
+      accept,
+      autoUpload,
+      crop,
+      disabled,
+      fail,
+      l.tooLarge,
+      l.wrongType,
+      maxSize,
+      onSelect,
+      runUpload,
+      setSrc,
+    ],
   );
-  handleFilesRef.current = handleFiles;
+  useEffect(() => {
+    handleFilesRef.current = handleFiles;
+  }, [handleFiles]);
 
   const handleSave = useCallback(async () => {
     if (!file || !srcUrl) return;
@@ -211,7 +235,7 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
     if (!area) return;
     try {
       const res = await getCroppedFile(file, srcUrl, area, output);
-      setResult(res);
+      setCropResult(res);
       onCropComplete?.(res);
       // Once cropped via the toolbar's Save, upload if a transport was provided.
       if (onUpload) {
@@ -223,15 +247,20 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
       fail({ code: 'custom', message: 'Could not process image', file });
       if (e instanceof Error) console.error('[react-drop-crop] crop failed:', e);
     }
-  }, [file, srcUrl, output, onCropComplete, onUpload, autoUpload, runUpload, fail]);
+  }, [file, srcUrl, output, onCropComplete, onUpload, runUpload, fail, setCropResult]);
 
   const handleRemove = useCallback(() => {
     reset();
     onRemove?.();
   }, [reset, onRemove]);
 
-  const showCropper =
-    crop && (status === 'cropping' || status === 'uploading') && srcUrl;
+  // Surface a decode failure (corrupt/unsupported image) instead of a blank cropper.
+  const handleImageError = useCallback(() => {
+    setSrc(null);
+    fail({ code: 'invalid-type', message: l.wrongType, file: file ?? undefined });
+  }, [setSrc, fail, l.wrongType, file]);
+
+  const showCropper = crop && (status === 'cropping' || status === 'uploading') && srcUrl;
   const showResult = status === 'success' && result;
   const isModal = mode === 'modal';
 
@@ -287,6 +316,7 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
           aspect={aspect}
           shape={shape}
           grid={grid}
+          onImageError={handleImageError}
         />
       ) : (
         <FrameCropper
@@ -297,6 +327,7 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
           zoom={zoom}
           grid={grid}
           restrictPosition={restrictPosition}
+          onImageError={handleImageError}
         />
       )}
       <div className={cx('rdc-toolbar', classNames?.toolbar)}>
@@ -318,7 +349,11 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
         </button>
       </div>
       {status === 'uploading' && (
-        <div className={cx('rdc-progress', classNames?.progress)} role="progressbar" aria-valuenow={Math.round(progress)}>
+        <div
+          className={cx('rdc-progress', classNames?.progress)}
+          role="progressbar"
+          aria-valuenow={Math.round(progress)}
+        >
           <div className="rdc-progress__bar" style={{ width: `${progress}%` }} />
         </div>
       )}

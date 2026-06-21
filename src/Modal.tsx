@@ -16,7 +16,13 @@ const FOCUSABLE =
  * Accessible modal: rendered in a portal on document.body, traps focus, closes
  * on Esc / backdrop click, locks body scroll, and restores focus on close.
  */
-export function Modal({ open, onClose, label, className, children }: ModalProps): React.ReactPortal | null {
+export function Modal({
+  open,
+  onClose,
+  label,
+  className,
+  children,
+}: ModalProps): React.ReactPortal | null {
   const cardRef = useRef<HTMLDivElement>(null);
   const restoreRef = useRef<HTMLElement | null>(null);
 
@@ -69,7 +75,12 @@ export function Modal({ open, onClose, label, className, children }: ModalProps)
   if (!open || typeof document === 'undefined') return null;
 
   return createPortal(
-    <div className={`rdc-modal${className ? ` ${className}` : ''}`} role="dialog" aria-modal="true" aria-label={label}>
+    <div
+      className={`rdc-modal${className ? ` ${className}` : ''}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label={label}
+    >
       <div className="rdc-modal__backdrop" onClick={onClose} />
       <div ref={cardRef} className="rdc-modal__card" tabIndex={-1}>
         {children}

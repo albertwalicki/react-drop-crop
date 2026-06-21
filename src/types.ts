@@ -21,13 +21,7 @@ export type Theme = 'light' | 'dark' | 'auto';
  */
 export type CropMode = 'rect' | 'frame';
 
-export type UploadStatus =
-  | 'idle'
-  | 'selected'
-  | 'cropping'
-  | 'uploading'
-  | 'success'
-  | 'error';
+export type UploadStatus = 'idle' | 'selected' | 'cropping' | 'uploading' | 'success' | 'error';
 
 export interface OutputOptions {
   /** Default `'webp'`. */
@@ -93,10 +87,7 @@ export interface ZoomOptions {
 
 /** Per-part `className` overrides. */
 export type ClassNames = Partial<
-  Record<
-    'root' | 'dropzone' | 'cropper' | 'toolbar' | 'progress' | 'preview' | 'button',
-    string
-  >
+  Record<'root' | 'dropzone' | 'cropper' | 'toolbar' | 'progress' | 'preview' | 'button', string>
 >;
 
 /** i18n labels (English defaults are provided). */

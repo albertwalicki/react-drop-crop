@@ -138,9 +138,7 @@ export async function getCroppedFile(
   );
   oriented.close?.();
 
-  const blob = await new Promise<Blob | null>((resolve) =>
-    canvas.toBlob(resolve, mime, quality),
-  );
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, mime, quality));
   if (!blob) throw new Error('Canvas export failed (toBlob returned null)');
 
   const fileName = resolveFileName(output, originalFile.name, blob.type || mime);

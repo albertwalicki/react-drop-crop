@@ -1,11 +1,4 @@
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import type { CropArea, CropShape, ZoomOptions } from '../types';
 import {
   clamp,
@@ -31,6 +24,7 @@ export interface FrameCropperProps {
   grid?: boolean;
   restrictPosition?: boolean;
   onCropAreaChange?: (area: CropArea) => void;
+  onImageError?: () => void;
 }
 
 const DEFAULT_ZOOM = { min: 1, max: 3, step: 0.01, initial: 1 } as const;
@@ -44,6 +38,7 @@ export const FrameCropper = forwardRef<CropperHandle, FrameCropperProps>(
       grid = true,
       restrictPosition = true,
       onCropAreaChange,
+      onImageError,
     } = props;
 
     const zMin = props.zoom?.min ?? DEFAULT_ZOOM.min;
@@ -128,11 +123,14 @@ export const FrameCropper = forwardRef<CropperHandle, FrameCropperProps>(
       img.onload = () => {
         if (alive) setNatural({ width: img.naturalWidth, height: img.naturalHeight });
       };
+      img.onerror = () => {
+        if (alive) onImageError?.();
+      };
       img.src = src;
       return () => {
         alive = false;
       };
-    }, [src]);
+    }, [src, onImageError]);
 
     // ---- re-clamp + emit when geometry settles ----
     useEffect(() => {
@@ -286,7 +284,6 @@ export const FrameCropper = forwardRef<CropperHandle, FrameCropperProps>(
           onKeyDown={onKeyDown}
         >
           {ready && (
-            // eslint-disable-next-line jsx-a11y/alt-text
             <img className="rdc-cropper__img" src={src} style={imgStyle} draggable={false} alt="" />
           )}
           <div className="rdc-cropper__window" style={windowStyle} data-shape={shape}>

@@ -22,13 +22,23 @@ export interface RectCropperProps {
   minCropWidth?: number;
   minCropHeight?: number;
   onCropAreaChange?: (area: CropArea) => void;
+  onImageError?: () => void;
 }
 
 const CORNER_HANDLES: Handle[] = ['nw', 'ne', 'se', 'sw'];
 
 export const RectCropper = forwardRef<CropperHandle, RectCropperProps>(
   function RectCropper(props, ref) {
-    const { src, aspect, shape, grid = true, minCropWidth, minCropHeight, onCropAreaChange } = props;
+    const {
+      src,
+      aspect,
+      shape,
+      grid = true,
+      minCropWidth,
+      minCropHeight,
+      onCropAreaChange,
+      onImageError,
+    } = props;
     const effectiveAspect = shape === 'round' ? 1 : aspect;
 
     const viewportRef = useRef<HTMLDivElement>(null);
@@ -45,7 +55,15 @@ export const RectCropper = forwardRef<CropperHandle, RectCropperProps>(
     const minH = Math.max(16, (minCropHeight ?? 0) / (contain.scale || 1));
 
     const areaRef = useRef<CropArea | null>(null);
-    const live = useRef({ display, scale: contain.scale, natural, crop, effectiveAspect, minW, minH });
+    const live = useRef({
+      display,
+      scale: contain.scale,
+      natural,
+      crop,
+      effectiveAspect,
+      minW,
+      minH,
+    });
     live.current = { display, scale: contain.scale, natural, crop, effectiveAspect, minW, minH };
 
     const commit = useCallback(
@@ -78,11 +96,14 @@ export const RectCropper = forwardRef<CropperHandle, RectCropperProps>(
       img.onload = () => {
         if (alive) setNatural({ width: img.naturalWidth, height: img.naturalHeight });
       };
+      img.onerror = () => {
+        if (alive) onImageError?.();
+      };
       img.src = src;
       return () => {
         alive = false;
       };
-    }, [src]);
+    }, [src, onImageError]);
 
     // Initialize / rescale the crop box as geometry settles.
     const prevDisplay = useRef<Size>({ width: 0, height: 0 });
@@ -94,14 +115,21 @@ export const RectCropper = forwardRef<CropperHandle, RectCropperProps>(
       } else if (prev.width !== display.width || prev.height !== display.height) {
         const sx = display.width / prev.width;
         const sy = display.height / prev.height;
-        commit({ x: crop.x * sx, y: crop.y * sy, width: crop.width * sx, height: crop.height * sy });
+        commit({
+          x: crop.x * sx,
+          y: crop.y * sy,
+          width: crop.width * sx,
+          height: crop.height * sy,
+        });
       }
       prevDisplay.current = display;
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ready, display.width, display.height, effectiveAspect]);
 
     // ---- drag (interior move + handle resize) ----
-    const drag = useRef<{ handle: Handle | 'move'; start: Rect; px: number; py: number } | null>(null);
+    const drag = useRef<{ handle: Handle | 'move'; start: Rect; px: number; py: number } | null>(
+      null,
+    );
 
     const onPointerDown = (e: React.PointerEvent) => {
       const el = viewportRef.current;
@@ -224,7 +252,9 @@ export const RectCropper = forwardRef<CropperHandle, RectCropperProps>(
                 borderRadius: shape === 'round' ? '50%' : '0',
               }}
             >
-              {grid && shape !== 'round' && <div className="rdc-cropper__grid" aria-hidden="true" />}
+              {grid && shape !== 'round' && (
+                <div className="rdc-cropper__grid" aria-hidden="true" />
+              )}
               {handles.map((h) => (
                 <span key={h} data-handle={h} className={`rdc-handle rdc-handle--${h}`} />
               ))}
