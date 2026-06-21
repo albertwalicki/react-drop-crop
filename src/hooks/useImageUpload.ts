@@ -40,8 +40,10 @@ export interface UseImageUpload {
   result: CropResult | null;
   cropperRef: React.RefObject<CropperHandle>;
   handleFiles: (files: FileList | null) => void;
-  handleSave: () => Promise<void>;
+  selectFile: (file: File) => void;
+  handleSave: () => Promise<CropResult | null>;
   handleRemove: () => void;
+  reset: () => void;
   handleImageError: () => void;
 }
 
@@ -158,10 +160,11 @@ export function useImageUpload(opts: UseImageUploadOptions): UseImageUpload {
     [onUpload, onUploadProgress, onUploadSuccess, fail, messages.uploadFailed],
   );
 
-  const handleFiles = useCallback(
-    (files: FileList | null) => {
-      const picked = files?.[0];
-      if (!picked || disabled) return;
+  // Core selection: validate one file, then enter the crop (or upload-as-is) flow.
+  // `selectFile` is the public/programmatic entry; handleFiles + paste delegate here.
+  const selectFile = useCallback(
+    (picked: File) => {
+      if (disabled) return;
 
       if (!matchesAccept(picked, accept)) {
         fail({ code: 'invalid-type', message: messages.wrongType, file: picked });
@@ -200,11 +203,19 @@ export function useImageUpload(opts: UseImageUploadOptions): UseImageUpload {
     ],
   );
 
+  const handleFiles = useCallback(
+    (files: FileList | null) => {
+      const picked = files?.[0];
+      if (picked) selectFile(picked);
+    },
+    [selectFile],
+  );
+
   // Paste support: drop a clipboard image onto the component. Ignored mid-upload.
-  const handleFilesRef = useRef(handleFiles);
+  const selectFileRef = useRef(selectFile);
   useEffect(() => {
-    handleFilesRef.current = handleFiles;
-  }, [handleFiles]);
+    selectFileRef.current = selectFile;
+  }, [selectFile]);
 
   useEffect(() => {
     if (disabled || !sources.includes('paste') || status === 'uploading') return;
@@ -214,11 +225,7 @@ export function useImageUpload(opts: UseImageUploadOptions): UseImageUpload {
       for (const item of items) {
         if (item.kind === 'file' && item.type.startsWith('image/')) {
           const f = item.getAsFile();
-          if (f) {
-            const dt = new DataTransfer();
-            dt.items.add(f);
-            handleFilesRef.current(dt.files);
-          }
+          if (f) selectFileRef.current(f);
           break;
         }
       }
@@ -227,10 +234,10 @@ export function useImageUpload(opts: UseImageUploadOptions): UseImageUpload {
     return () => document.removeEventListener('paste', onPaste);
   }, [disabled, sources, status]);
 
-  const handleSave = useCallback(async () => {
-    if (!file || !srcUrl) return;
+  const handleSave = useCallback(async (): Promise<CropResult | null> => {
+    if (!file || !srcUrl) return null;
     const area = cropperRef.current?.getCropArea();
-    if (!area) return;
+    if (!area) return null;
     try {
       const res = await getCroppedFile(file, srcUrl, area, output);
       setCropResult(res);
@@ -240,9 +247,11 @@ export function useImageUpload(opts: UseImageUploadOptions): UseImageUpload {
       } else {
         setStatus('success');
       }
+      return res;
     } catch (e) {
       fail({ code: 'custom', message: 'Could not process image', file });
       if (e instanceof Error) console.error('[react-drop-crop] crop failed:', e);
+      return null;
     }
   }, [file, srcUrl, output, onCropComplete, onUpload, runUpload, fail, setCropResult]);
 
@@ -266,8 +275,10 @@ export function useImageUpload(opts: UseImageUploadOptions): UseImageUpload {
     result,
     cropperRef,
     handleFiles,
+    selectFile,
     handleSave,
     handleRemove,
+    reset,
     handleImageError,
   };
 }

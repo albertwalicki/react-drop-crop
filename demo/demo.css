@@ -93,6 +93,19 @@ body {
   border-radius: 8px;
 }
 
+.demo__extbtn {
+  margin-top: 12px;
+  appearance: none;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  padding: 8px 16px;
+  color: #fff;
+  background: #16a34a;
+  border: none;
+  border-radius: 8px;
+}
+
 /* ---- dark page chrome (explicit + auto via OS preference) ---- */
 body[data-theme='dark'] {
   background: #0f0f11;

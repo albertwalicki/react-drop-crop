@@ -107,6 +107,28 @@ export type Labels = Partial<
   >
 >;
 
+/**
+ * Imperative handle exposed via `ref` — drive the component from outside (e.g.
+ * trigger crop + upload from your own form's submit button).
+ *
+ * ```tsx
+ * const ref = useRef<ImageUploadCropHandle>(null);
+ * <form onSubmit={async (e) => { e.preventDefault(); await ref.current?.submit(); }}>
+ *   <ImageUploadCrop ref={ref} onUpload={myUpload} />
+ * </form>
+ * ```
+ */
+export interface ImageUploadCropHandle {
+  /** Crop the current image (and upload, if `onUpload` is set), like the Save button. */
+  submit: () => Promise<CropResult | null>;
+  /** Provide a file programmatically, bypassing the picker/drop/paste. */
+  selectFile: (file: File) => void;
+  /** Current crop rectangle in source pixels, or null if no cropper is active. */
+  getCropArea: () => CropArea | null;
+  /** Clear the current selection/result back to idle. */
+  reset: () => void;
+}
+
 export interface ImageUploadCropProps {
   // ---- Source / input -------------------------------------
   /** Accepted MIME types. Default `['image/*']`. */

@@ -1,6 +1,11 @@
-import { StrictMode, useEffect, useState } from 'react';
+import { StrictMode, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ImageUploadCrop, type CropResult, type Theme } from 'react-drop-crop';
+import {
+  ImageUploadCrop,
+  type CropResult,
+  type ImageUploadCropHandle,
+  type Theme,
+} from 'react-drop-crop';
 import '../src/styles/index.css';
 import './demo.css';
 
@@ -21,6 +26,7 @@ const THEMES: Theme[] = ['light', 'dark', 'auto'];
 function App(): React.JSX.Element {
   const [last, setLast] = useState<CropResult | null>(null);
   const [theme, setTheme] = useState<Theme>('light');
+  const externalRef = useRef<ImageUploadCropHandle>(null);
 
   // Keep the demo page chrome in sync with the selected component theme.
   useEffect(() => {
@@ -91,6 +97,26 @@ function App(): React.JSX.Element {
           output={{ format: 'webp', quality: 0.9 }}
           onCropComplete={(res) => setLast(res)}
         />
+      </section>
+
+      <section className="demo__panel">
+        <h2>External control — submit from your own button</h2>
+        <ImageUploadCrop
+          ref={externalRef}
+          theme={theme}
+          cropMode="frame"
+          shape="round"
+          aspect={1}
+          output={{ format: 'webp', quality: 0.9 }}
+          onCropComplete={(res) => setLast(res)}
+        />
+        <button
+          type="button"
+          className="demo__extbtn"
+          onClick={() => void externalRef.current?.submit()}
+        >
+          Submit from outside (ref.submit())
+        </button>
       </section>
 
       {last && (

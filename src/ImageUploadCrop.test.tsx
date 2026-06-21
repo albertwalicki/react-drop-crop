@@ -1,7 +1,8 @@
+import { createRef } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ImageUploadCrop } from './ImageUploadCrop';
-import type { ImageUploadError } from './types';
+import type { ImageUploadCropHandle, ImageUploadError } from './types';
 
 function makeFile(name: string, type: string, size = 4): File {
   const file = new File(['x'.repeat(size)], name, { type });
@@ -91,5 +92,18 @@ describe('ImageUploadCrop', () => {
     const { container } = render(<ImageUploadCrop onStatusChange={onStatusChange} />);
     selectFile(getFileInput(container), makeFile('a.png', 'image/png'));
     expect(onStatusChange).toHaveBeenCalledWith('cropping');
+  });
+
+  it('drives selection and reset through the imperative ref handle', () => {
+    const ref = createRef<ImageUploadCropHandle>();
+    const onSelect = vi.fn();
+    render(<ImageUploadCrop ref={ref} onSelect={onSelect} />);
+
+    act(() => ref.current!.selectFile(makeFile('a.png', 'image/png')));
+    expect(onSelect).toHaveBeenCalledOnce();
+    expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
+
+    act(() => ref.current!.reset());
+    expect(screen.queryByRole('button', { name: /save/i })).not.toBeInTheDocument();
   });
 });
