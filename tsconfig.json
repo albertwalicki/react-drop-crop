@@ -20,5 +20,5 @@
     "useDefineForClassFields": true,
     "noEmit": true
   },
-  "include": ["src", "demo", "vite.config.ts", "tsup.config.ts"]
+  "include": ["src", "demo", "vite.config.ts", "vitest.config.ts", "tsup.config.ts"]
 }

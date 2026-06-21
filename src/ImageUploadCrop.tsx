@@ -7,6 +7,7 @@ import type {
 } from './types';
 import { FrameCropper, type FrameCropperHandle } from './cropper/FrameCropper';
 import { getCroppedFile } from './output/getCroppedFile';
+import { Modal } from './Modal';
 
 const DEFAULT_LABELS = {
   dropHere: 'Drag & drop an image, or',
@@ -37,6 +38,7 @@ function matchesAccept(file: File, accept: string[]): boolean {
 export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element {
   const {
     accept = ['image/*'],
+    sources = ['drop', 'browse', 'paste'],
     disabled = false,
     maxSize,
     crop = true,
@@ -144,6 +146,30 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
     [onUpload, onUploadProgress, onUploadSuccess, fail, l.uploadFailed],
   );
 
+  const handleFilesRef = useRef<((files: FileList | null) => void) | null>(null);
+
+  // Paste support: drop a clipboard image onto the component while it's idle.
+  useEffect(() => {
+    if (disabled || !sources.includes('paste')) return;
+    const onPaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      for (const item of items) {
+        if (item.kind === 'file' && item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          if (file) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            handleFilesRef.current?.(dt.files);
+          }
+          break;
+        }
+      }
+    };
+    document.addEventListener('paste', onPaste);
+    return () => document.removeEventListener('paste', onPaste);
+  }, [disabled, sources]);
+
   const handleFiles = useCallback(
     (files: FileList | null) => {
       const picked = files?.[0];
@@ -175,6 +201,7 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
     },
     [accept, autoUpload, crop, disabled, fail, l.tooLarge, l.wrongType, maxSize, onSelect, runUpload],
   );
+  handleFilesRef.current = handleFiles;
 
   const handleSave = useCallback(async () => {
     if (!file || !srcUrl) return;
@@ -301,10 +328,9 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
       {dropzone}
       {showCropper &&
         (isModal ? (
-          <div className="rdc-modal" role="dialog" aria-modal="true" aria-label={l.cropTitle}>
-            <div className="rdc-modal__backdrop" onClick={handleRemove} />
-            <div className="rdc-modal__card">{cropperPanel}</div>
-          </div>
+          <Modal open onClose={handleRemove} label={l.cropTitle}>
+            {cropperPanel}
+          </Modal>
         ) : (
           cropperPanel
         ))}
