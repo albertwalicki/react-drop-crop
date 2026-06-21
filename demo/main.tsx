@@ -1,6 +1,6 @@
-import { StrictMode, useState } from 'react';
+import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ImageUploadCrop, type CropResult } from 'react-drop-crop';
+import { ImageUploadCrop, type CropResult, type Theme } from 'react-drop-crop';
 import '../src/styles/index.css';
 import './demo.css';
 
@@ -16,17 +16,42 @@ async function fakeUpload(
   }
 }
 
+const THEMES: Theme[] = ['light', 'dark', 'auto'];
+
 function App(): React.JSX.Element {
   const [last, setLast] = useState<CropResult | null>(null);
+  const [theme, setTheme] = useState<Theme>('light');
+
+  // Keep the demo page chrome in sync with the selected component theme.
+  useEffect(() => {
+    document.body.dataset.theme = theme;
+  }, [theme]);
 
   return (
     <main className="demo">
-      <h1>react-drop-crop</h1>
-      <p className="demo__tagline">Beautiful by default, you bring the upload.</p>
+      <header className="demo__head">
+        <div>
+          <h1>react-drop-crop</h1>
+          <p className="demo__tagline">Beautiful by default, you bring the upload.</p>
+        </div>
+        <div className="demo__themetoggle" role="group" aria-label="Theme">
+          {THEMES.map((t) => (
+            <button
+              key={t}
+              type="button"
+              data-active={t === theme || undefined}
+              onClick={() => setTheme(t)}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      </header>
 
       <section className="demo__panel">
         <h2>Avatar — round, modal, 1:1</h2>
         <ImageUploadCrop
+          theme={theme}
           aspect={1}
           shape="round"
           mode="modal"
@@ -45,6 +70,7 @@ function App(): React.JSX.Element {
       <section className="demo__panel">
         <h2>Inline — frame mode, free aspect</h2>
         <ImageUploadCrop
+          theme={theme}
           mode="inline"
           cropMode="frame"
           shape="rect"
@@ -57,6 +83,7 @@ function App(): React.JSX.Element {
       <section className="demo__panel">
         <h2>Inline — rect mode (resize box), 16:9</h2>
         <ImageUploadCrop
+          theme={theme}
           mode="inline"
           cropMode="rect"
           shape="rect"

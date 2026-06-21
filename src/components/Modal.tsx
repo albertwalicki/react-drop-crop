@@ -1,10 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import type { Theme } from '../types';
+import { cx } from '../core/cx';
 
 export interface ModalProps {
   open: boolean;
   onClose: () => void;
   label: string;
+  /** Active theme — carried onto the portal so --rdc-* tokens resolve in the portal. */
+  theme?: Theme;
   className?: string;
   children: React.ReactNode;
 }
@@ -20,6 +24,7 @@ export function Modal({
   open,
   onClose,
   label,
+  theme = 'auto',
   className,
   children,
 }: ModalProps): React.ReactPortal | null {
@@ -75,8 +80,11 @@ export function Modal({
   if (!open || typeof document === 'undefined') return null;
 
   return createPortal(
+    // `rdc-root` + data-theme re-establish the --rdc-* tokens, since the portal
+    // lives on document.body, outside the component's own root element.
     <div
-      className={`rdc-modal${className ? ` ${className}` : ''}`}
+      className={cx('rdc-modal', 'rdc-root', className)}
+      data-theme={theme}
       role="dialog"
       aria-modal="true"
       aria-label={label}

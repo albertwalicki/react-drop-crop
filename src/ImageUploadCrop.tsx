@@ -158,7 +158,7 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
       </Dropzone>
       {showCropper &&
         (isModal ? (
-          <Modal open onClose={handleRemove} label={l.cropTitle}>
+          <Modal open onClose={handleRemove} label={l.cropTitle} theme={theme}>
             {cropperPanel}
           </Modal>
         ) : (

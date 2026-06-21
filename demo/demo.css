@@ -1,13 +1,11 @@
 body {
   margin: 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   background: #f3f4f6;
   color: #111827;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
 }
 
 .demo {
@@ -16,14 +14,48 @@ body {
   padding: 48px 24px;
 }
 
+.demo__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
 .demo h1 {
   margin: 0 0 4px;
   font-size: 2rem;
 }
 
 .demo__tagline {
-  margin: 0 0 32px;
+  margin: 0;
   color: #6b7280;
+}
+
+.demo__themetoggle {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.demo__themetoggle button {
+  appearance: none;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+  padding: 4px 10px;
+  border-radius: 7px;
+}
+
+.demo__themetoggle button[data-active] {
+  background: #2563eb;
+  color: #fff;
 }
 
 .demo__panel {
@@ -54,4 +86,41 @@ body {
 .demo__result {
   max-width: 200px;
   border-radius: 8px;
+}
+
+/* ---- dark page chrome (explicit + auto via OS preference) ---- */
+body[data-theme='dark'] {
+  background: #0f0f11;
+  color: #f4f4f5;
+}
+body[data-theme='dark'] .demo__tagline,
+body[data-theme='dark'] .demo__panel h2,
+body[data-theme='dark'] .demo__meta {
+  color: #a1a1aa;
+}
+body[data-theme='dark'] .demo__themetoggle {
+  background: rgba(255, 255, 255, 0.08);
+}
+body[data-theme='dark'] .demo__panel {
+  background: #18181b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  body[data-theme='auto'] {
+    background: #0f0f11;
+    color: #f4f4f5;
+  }
+  body[data-theme='auto'] .demo__tagline,
+  body[data-theme='auto'] .demo__panel h2,
+  body[data-theme='auto'] .demo__meta {
+    color: #a1a1aa;
+  }
+  body[data-theme='auto'] .demo__themetoggle {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  body[data-theme='auto'] .demo__panel {
+    background: #18181b;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  }
 }
