@@ -43,11 +43,24 @@ function App(): React.JSX.Element {
       </section>
 
       <section className="demo__panel">
-        <h2>Inline — free aspect, rectangular</h2>
+        <h2>Inline — frame mode, free aspect</h2>
         <ImageUploadCrop
           mode="inline"
+          cropMode="frame"
           shape="rect"
           aspect="free"
+          output={{ format: 'webp', quality: 0.9 }}
+          onCropComplete={(res) => setLast(res)}
+        />
+      </section>
+
+      <section className="demo__panel">
+        <h2>Inline — rect mode (resize box), 16:9</h2>
+        <ImageUploadCrop
+          mode="inline"
+          cropMode="rect"
+          shape="rect"
+          aspect={16 / 9}
           output={{ format: 'webp', quality: 0.9 }}
           onCropComplete={(res) => setLast(res)}
         />

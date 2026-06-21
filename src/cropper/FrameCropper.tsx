@@ -21,10 +21,7 @@ import {
   type Size,
 } from './geometry';
 
-export interface FrameCropperHandle {
-  /** Current crop rectangle in source-image pixels, or null if not ready. */
-  getCropArea: () => CropArea | null;
-}
+import type { CropperHandle } from './types';
 
 export interface FrameCropperProps {
   src: string;
@@ -38,7 +35,7 @@ export interface FrameCropperProps {
 
 const DEFAULT_ZOOM = { min: 1, max: 3, step: 0.01, initial: 1 } as const;
 
-export const FrameCropper = forwardRef<FrameCropperHandle, FrameCropperProps>(
+export const FrameCropper = forwardRef<CropperHandle, FrameCropperProps>(
   function FrameCropper(props, ref) {
     const {
       src,

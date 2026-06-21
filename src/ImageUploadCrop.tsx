@@ -5,7 +5,9 @@ import type {
   ImageUploadError,
   UploadStatus,
 } from './types';
-import { FrameCropper, type FrameCropperHandle } from './cropper/FrameCropper';
+import { FrameCropper } from './cropper/FrameCropper';
+import { RectCropper } from './cropper/RectCropper';
+import type { CropperHandle } from './cropper/types';
 import { getCroppedFile } from './output/getCroppedFile';
 import { Modal } from './Modal';
 
@@ -68,7 +70,7 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
   } = props;
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const cropperRef = useRef<FrameCropperHandle>(null);
+  const cropperRef = useRef<CropperHandle>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const [file, setFile] = useState<File | null>(null);
@@ -278,15 +280,25 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
   const cropperPanel = showCropper && (
     <div className={cx('rdc-cropper-panel', classNames?.cropper)}>
       {isModal && <h2 className="rdc-cropper-panel__title">{l.cropTitle}</h2>}
-      <FrameCropper
-        ref={cropperRef}
-        src={srcUrl}
-        aspect={aspect}
-        shape={shape}
-        zoom={zoom}
-        grid={grid}
-        restrictPosition={restrictPosition}
-      />
+      {cropMode === 'rect' ? (
+        <RectCropper
+          ref={cropperRef}
+          src={srcUrl}
+          aspect={aspect}
+          shape={shape}
+          grid={grid}
+        />
+      ) : (
+        <FrameCropper
+          ref={cropperRef}
+          src={srcUrl}
+          aspect={aspect}
+          shape={shape}
+          zoom={zoom}
+          grid={grid}
+          restrictPosition={restrictPosition}
+        />
+      )}
       <div className={cx('rdc-toolbar', classNames?.toolbar)}>
         <button
           type="button"
@@ -312,9 +324,6 @@ export function ImageUploadCrop(props: ImageUploadCropProps): React.JSX.Element 
       )}
     </div>
   );
-
-  // cropMode other than 'frame' isn't built yet — fall back to frame.
-  void cropMode;
 
   return (
     <div

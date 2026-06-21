@@ -206,6 +206,7 @@
 .rdc-cropper__grid {
   position: absolute;
   inset: 0;
+  pointer-events: none;
 }
 
 .rdc-cropper__window[data-shape='round'] .rdc-cropper__grid {
@@ -222,6 +223,83 @@
 .rdc-cropper__zoom input[type='range'] {
   flex: 1;
   accent-color: var(--rdc-accent);
+}
+
+/* ---- rect mode (resize-selection-box) ---- */
+.rdc-cropper__viewport--rect {
+  cursor: default;
+}
+
+.rdc-rect {
+  position: absolute;
+  box-shadow: 0 0 0 9999px var(--rdc-overlay);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  cursor: move;
+  touch-action: none;
+}
+
+.rdc-rect:focus-visible {
+  outline: 2px solid var(--rdc-accent);
+  outline-offset: 2px;
+}
+
+.rdc-handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border: 1px solid var(--rdc-accent);
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+.rdc-handle--nw {
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  cursor: nwse-resize;
+}
+.rdc-handle--n {
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -50%);
+  cursor: ns-resize;
+}
+.rdc-handle--ne {
+  left: 100%;
+  top: 0;
+  transform: translate(-50%, -50%);
+  cursor: nesw-resize;
+}
+.rdc-handle--e {
+  left: 100%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  cursor: ew-resize;
+}
+.rdc-handle--se {
+  left: 100%;
+  top: 100%;
+  transform: translate(-50%, -50%);
+  cursor: nwse-resize;
+}
+.rdc-handle--s {
+  left: 50%;
+  top: 100%;
+  transform: translate(-50%, -50%);
+  cursor: ns-resize;
+}
+.rdc-handle--sw {
+  left: 0;
+  top: 100%;
+  transform: translate(-50%, -50%);
+  cursor: nesw-resize;
+}
+.rdc-handle--w {
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  cursor: ew-resize;
 }
 
 /* ---- cropper panel / toolbar / progress ---- */
