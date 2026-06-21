@@ -1,0 +1,42 @@
+{
+  "name": "react-drop-crop",
+  "version": "0.0.1",
+  "description": "Beautiful by default, you bring the upload — a drop-in React image upload + crop component (drag-drop, crop, progress, bring-your-own transport). Work in progress.",
+  "keywords": [
+    "react",
+    "image",
+    "crop",
+    "upload",
+    "avatar",
+    "dropzone",
+    "resize",
+    "webp",
+    "image-crop",
+    "image-upload",
+    "cropper",
+    "react-component",
+    "drag-and-drop"
+  ],
+  "license": "MIT",
+  "author": "Albert Walicki <walickialbert@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/albertwalicki/react-drop-crop.git"
+  },
+  "homepage": "https://github.com/albertwalicki/react-drop-crop#readme",
+  "bugs": {
+    "url": "https://github.com/albertwalicki/react-drop-crop/issues"
+  },
+  "type": "module",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "sideEffects": false,
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  }
+}
