@@ -28,9 +28,25 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
+.demo__panel + .demo__panel {
+  margin-top: 24px;
+}
+
 .demo__panel h2 {
   margin: 0 0 16px;
   font-size: 1rem;
   font-weight: 600;
   color: #374151;
+}
+
+.demo__meta {
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.demo__result {
+  max-width: 200px;
+  border-radius: 8px;
 }
