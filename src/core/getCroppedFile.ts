@@ -81,6 +81,8 @@ export async function getCroppedFile(
   src: string,
   cropArea: CropArea,
   output?: OutputOptions,
+  /** Mask the output to a circle (transparent corners for webp/png). */
+  circular = false,
 ): Promise<CropResult> {
   const oriented = await loadOriented(originalFile, src);
 
@@ -117,10 +119,19 @@ export async function getCroppedFile(
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Could not get 2D canvas context');
 
-  // Flatten transparency for formats without an alpha channel.
+  // Flatten transparency for formats without an alpha channel. (Done before the
+  // circular clip so a round jpeg gets solid corners rather than black ones.)
   if (mime === 'image/jpeg') {
     ctx.fillStyle = output?.fillColor ?? '#ffffff';
     ctx.fillRect(0, 0, targetW, targetH);
+  }
+
+  // Round shape: clip to an inscribed ellipse so corners are transparent
+  // (webp/png) or the fill color (jpeg).
+  if (circular) {
+    ctx.beginPath();
+    ctx.ellipse(targetW / 2, targetH / 2, targetW / 2, targetH / 2, 0, 0, Math.PI * 2);
+    ctx.clip();
   }
 
   ctx.imageSmoothingEnabled = true;

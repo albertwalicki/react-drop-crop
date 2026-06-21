@@ -2,6 +2,7 @@ import type { MutableRefObject } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useImageUpload, type UseImageUploadOptions } from './useImageUpload';
+import { getCroppedFile } from '../core/getCroppedFile';
 import type { ImageUploadError } from '../types';
 import type { CropperHandle } from '../cropper/types';
 
@@ -106,6 +107,17 @@ describe('useImageUpload', () => {
     expect(onUpload).toHaveBeenCalledOnce();
     expect(result.current.status).toBe('success');
     expect(result.current.result?.file.type).toBe('image/webp');
+  });
+
+  it('requests a circular mask when circularOutput is set', async () => {
+    const { result } = renderHook(() => useImageUpload(opts({ circularOutput: true })));
+    act(() => result.current.handleFiles(fileList(png())));
+    attachCropper(result.current.cropperRef);
+    await act(async () => {
+      await result.current.handleSave();
+    });
+    // getCroppedFile(originalFile, src, cropArea, output, circular)
+    expect(vi.mocked(getCroppedFile).mock.calls.at(-1)?.[4]).toBe(true);
   });
 
   it('crops without uploading when no transport is given', async () => {

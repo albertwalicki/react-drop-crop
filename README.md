@@ -197,6 +197,7 @@ For deeper changes, target parts via `classNames`: `root`, `dropzone`, `cropper`
 
 - **WebP** is the default output and is encoded in all current browsers. Some upload backends reject `image/webp` — set `output.format` to `'jpeg'`/`'png'` if needed.
 - **EXIF orientation** is applied on decode, so rotated phone photos crop upright.
+- **`shape="round"`** produces a genuinely circular image with transparent corners (webp/png); for jpeg the corners are filled with `output.fillColor`.
 - Targets modern evergreen browsers (uses Pointer Events, `createImageBitmap`, `color-mix`).
 
 ## License

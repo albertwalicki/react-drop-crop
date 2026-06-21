@@ -19,6 +19,8 @@ export interface UseImageUploadOptions {
   crop: boolean;
   autoUpload: boolean;
   output?: OutputOptions;
+  /** Mask the cropped output to a circle (shape="round"). */
+  circularOutput?: boolean;
   /** Pre-resolved error/label strings. */
   messages: { wrongType: string; tooLarge: string; uploadFailed: string };
   onUpload?: (file: File, ctrl: UploadController) => Promise<unknown>;
@@ -61,6 +63,7 @@ export function useImageUpload(opts: UseImageUploadOptions): UseImageUpload {
     crop,
     autoUpload,
     output,
+    circularOutput,
     messages,
     onUpload,
     onSelect,
@@ -239,7 +242,7 @@ export function useImageUpload(opts: UseImageUploadOptions): UseImageUpload {
     const area = cropperRef.current?.getCropArea();
     if (!area) return null;
     try {
-      const res = await getCroppedFile(file, srcUrl, area, output);
+      const res = await getCroppedFile(file, srcUrl, area, output, circularOutput);
       setCropResult(res);
       onCropComplete?.(res);
       if (onUpload) {
@@ -253,7 +256,17 @@ export function useImageUpload(opts: UseImageUploadOptions): UseImageUpload {
       if (e instanceof Error) console.error('[react-drop-crop] crop failed:', e);
       return null;
     }
-  }, [file, srcUrl, output, onCropComplete, onUpload, runUpload, fail, setCropResult]);
+  }, [
+    file,
+    srcUrl,
+    output,
+    circularOutput,
+    onCropComplete,
+    onUpload,
+    runUpload,
+    fail,
+    setCropResult,
+  ]);
 
   const handleRemove = useCallback(() => {
     reset();

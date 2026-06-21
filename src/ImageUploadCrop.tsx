@@ -80,6 +80,7 @@ export const ImageUploadCrop = forwardRef<ImageUploadCropHandle, ImageUploadCrop
       crop,
       autoUpload,
       output,
+      circularOutput: shape === 'round',
       messages: { wrongType: l.wrongType, tooLarge: l.tooLarge, uploadFailed: l.uploadFailed },
       onUpload,
       onSelect,
