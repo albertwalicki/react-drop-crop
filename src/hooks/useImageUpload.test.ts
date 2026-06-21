@@ -62,7 +62,9 @@ describe('useImageUpload', () => {
   it('rejects a wrong type', () => {
     const onError = vi.fn();
     const { result } = renderHook(() => useImageUpload(opts({ onError })));
-    act(() => result.current.handleFiles(fileList(new File(['x'], 'a.txt', { type: 'text/plain' }))));
+    act(() =>
+      result.current.handleFiles(fileList(new File(['x'], 'a.txt', { type: 'text/plain' }))),
+    );
     expect(result.current.status).toBe('error');
     expect((onError.mock.calls[0]![0] as ImageUploadError).code).toBe('invalid-type');
   });
@@ -75,9 +77,11 @@ describe('useImageUpload', () => {
   });
 
   it('uploads as-is when crop is false and autoUpload is set', async () => {
-    const onUpload = vi.fn(async (_f: File, { onProgress }: { onProgress: (p: number) => void }) => {
-      onProgress(100);
-    });
+    const onUpload = vi.fn(
+      async (_f: File, { onProgress }: { onProgress: (p: number) => void }) => {
+        onProgress(100);
+      },
+    );
     const { result } = renderHook(() =>
       useImageUpload(opts({ crop: false, autoUpload: true, onUpload })),
     );
