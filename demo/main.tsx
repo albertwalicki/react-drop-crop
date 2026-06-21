@@ -6,8 +6,16 @@ import {
   type ImageUploadCropHandle,
   type Theme,
 } from 'react-drop-crop';
+import sampleUrl from './sample.svg?url';
 import '../src/styles/index.css';
 import './demo.css';
+
+// Fetch the bundled sample and hand it to the component via its ref —
+// makes recording the demo trivial (no Finder drag needed).
+async function loadSample(ref: React.RefObject<ImageUploadCropHandle | null>): Promise<void> {
+  const blob = await (await fetch(sampleUrl)).blob();
+  ref.current?.selectFile(new File([blob], 'sample.svg', { type: 'image/svg+xml' }));
+}
 
 // Demo transport: fake an upload with incremental progress.
 async function fakeUpload(
@@ -26,6 +34,7 @@ const THEMES: Theme[] = ['light', 'dark', 'auto'];
 function App(): React.JSX.Element {
   const [last, setLast] = useState<CropResult | null>(null);
   const [theme, setTheme] = useState<Theme>('light');
+  const avatarRef = useRef<ImageUploadCropHandle>(null);
   const externalRef = useRef<ImageUploadCropHandle>(null);
 
   // Keep the demo page chrome in sync with the selected component theme.
@@ -57,6 +66,7 @@ function App(): React.JSX.Element {
       <section className="demo__panel">
         <h2>Avatar — round, modal, 1:1</h2>
         <ImageUploadCrop
+          ref={avatarRef}
           theme={theme}
           aspect={1}
           shape="round"
@@ -71,6 +81,9 @@ function App(): React.JSX.Element {
           onUpload={fakeUpload}
           onUploadSuccess={() => console.log('upload done')}
         />
+        <button type="button" className="demo__extbtn" onClick={() => void loadSample(avatarRef)}>
+          Load sample image
+        </button>
       </section>
 
       <section className="demo__panel">
