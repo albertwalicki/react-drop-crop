@@ -1,7 +1,7 @@
 {
   "name": "react-drop-crop",
-  "version": "0.0.1",
-  "description": "Beautiful by default, you bring the upload — a drop-in React image upload + crop component (drag-drop, crop, progress, bring-your-own transport). Work in progress.",
+  "version": "0.1.0",
+  "description": "Beautiful by default, you bring the upload — a drop-in React image upload + crop component: drag-drop, pan/zoom or resize-box cropping, EXIF-correct WebP output, and bring-your-own upload with progress. Zero dependencies, TypeScript-first.",
   "keywords": [
     "react",
     "image",
